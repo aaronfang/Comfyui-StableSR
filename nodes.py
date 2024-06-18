@@ -51,8 +51,9 @@ class StableSRColorFix:
         color_fix_func = (
             wavelet_color_fix if color_fix == "Wavelet" else adain_color_fix
         )
-        result_image = color_fix_func(tensor2pil(image), tensor2pil(color_map_image))
-        refined_image = pil2tensor(result_image)
+        result_images = [color_fix_func(tensor2pil(image[i].unsqueeze(0)), tensor2pil(color_map_image)) for i in range(len(image))]
+        refined_image = [pil2tensor(result_image).squeeze(0) for result_image in result_images]
+        refined_image = torch.stack(refined_image)
         return (refined_image,)
 
 
