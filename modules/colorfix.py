@@ -5,7 +5,7 @@ from torch.nn import functional as F
 
 from torchvision.transforms import ToTensor, ToPILImage
 
-def adain_color_fix(target: Image, source: Image):
+def adain_color_fix(target: Image, source: Image, blur_level):
     # Convert images to tensors
     to_tensor = ToTensor()
     target_tensor = to_tensor(target).unsqueeze(0)
@@ -20,7 +20,7 @@ def adain_color_fix(target: Image, source: Image):
 
     return result_image
 
-def wavelet_color_fix(target: Image, source: Image):
+def wavelet_color_fix(target: Image, source: Image, blur_level):
     source = source.resize(target.size, resample=Image.Resampling.LANCZOS)
 
     # Convert images to tensors
@@ -29,7 +29,7 @@ def wavelet_color_fix(target: Image, source: Image):
     source_tensor = to_tensor(source).unsqueeze(0)
 
     # Apply wavelet reconstruction
-    result_tensor = wavelet_reconstruction(target_tensor, source_tensor)
+    result_tensor = wavelet_reconstruction(target_tensor, source_tensor, blur_level)
 
     # Convert tensor back to image
     to_image = ToPILImage()
@@ -101,15 +101,15 @@ def wavelet_decomposition(image: Tensor, levels=5):
 
     return high_freq, low_freq
 
-def wavelet_reconstruction(content_feat:Tensor, style_feat:Tensor):
+def wavelet_reconstruction(content_feat:Tensor, style_feat:Tensor, blur_level: int = 5):
     """
     Apply wavelet decomposition, so that the content will have the same color as the style.
     """
     # calculate the wavelet decomposition of the content feature
-    content_high_freq, content_low_freq = wavelet_decomposition(content_feat)
+    content_high_freq, content_low_freq = wavelet_decomposition(content_feat, blur_level)
     del content_low_freq
     # calculate the wavelet decomposition of the style feature
-    style_high_freq, style_low_freq = wavelet_decomposition(style_feat)
+    style_high_freq, style_low_freq = wavelet_decomposition(style_feat, blur_level)
     del style_high_freq
     # reconstruct the content feature with the style's high frequency
     return content_high_freq + style_low_freq

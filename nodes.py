@@ -40,6 +40,8 @@ class StableSRColorFix:
                         "AdaIN",
                     ],
                 ),
+                "blur_level": ("INT", {"default": 5, "min": 0, "max": 10}),
+                "opacity": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}), 
             },
         }
 
@@ -47,13 +49,14 @@ class StableSRColorFix:
     FUNCTION = "fix_color"
     CATEGORY = "image"
 
-    def fix_color(self, image, color_map_image, color_fix):
+    def fix_color(self, image, color_map_image, color_fix, blur_level, opacity):
         color_fix_func = (
             wavelet_color_fix if color_fix == "Wavelet" else adain_color_fix
         )
-        result_images = [color_fix_func(tensor2pil(image[i].unsqueeze(0)), tensor2pil(color_map_image)) for i in range(len(image))]
+        result_images = [color_fix_func(tensor2pil(image[i].unsqueeze(0)), tensor2pil(color_map_image), blur_level) for i in range(len(image))]
         refined_image = [pil2tensor(result_image).squeeze(0) for result_image in result_images]
         refined_image = torch.stack(refined_image)
+        refined_image = torch.lerp(image, refined_image, opacity)
         return (refined_image,)
 
 
