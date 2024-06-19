@@ -1,3 +1,7 @@
+### Add two parameters:
+- `blur_level` - In Wavelet mode, you can play around with "blur_level", to achieve different levels of blurriness.
+- `opacity` - By tweaking the transparency settings, we can achieve a linear blend with the original image.
+---
 # comfyui-stablsr
 
 Put the StableSR webui_786v_139.ckpt model into Comyfui/models/stablesr/  
